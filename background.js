@@ -1,60 +1,50 @@
+const MESSAGE_EVENTS = {
+  GET_STORAGE_DATA: "GET_STORAGE_DATA",
+  LOG_STORAGE_DATA: "LOG_STORAGE_DATA",
+  INSPECT_ON: "INSPECT_ON",
+};
+
+const getActiveTab = async () => {
+  const tabs = await chrome.tabs.query({
+    currentWindow: true,
+    active: true,
+  });
+
+  return tabs[0];
+};
+
 // Background script
-chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-  if (request.action === "logData") {
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-      if (tabs.length > 0) {
-        var activeTab = tabs[0];
-
-        // Log local storage
-        chrome.scripting.executeScript(
-          {
-            target: { tabId: activeTab.id },
-            function: logLocalStorage,
-          },
-          function (results) {
-            var localStorageData = results[0].result;
-
-            // Log session storage
-            chrome.scripting.executeScript(
-              {
-                target: { tabId: activeTab.id },
-                function: logSessionStorage,
-              },
-              function (results) {
-                var sessionStorageData = results[0].result;
-
-                // Log cookies
-                chrome.cookies.getAll(
-                  { url: activeTab.url },
-                  function (cookies) {
-                    // Send the logged data back to the popup script
-                    chrome.runtime.sendMessage({
-                      action: "logResult",
-                      data: {
-                        localStorageData: localStorageData,
-                        sessionStorageData: sessionStorageData,
-                        cookies: cookies,
-                      },
-                    });
-                  }
-                );
-              }
-            );
-          }
-        );
-      }
-    });
+chrome.runtime.onMessage.addListener(async function (
+  request,
+  sender,
+  sendResponse
+) {
+  switch (request.action) {
+    case MESSAGE_EVENTS.GET_STORAGE_DATA:
+      getStorage(request.data);
+      break;
+    default:
+      break;
   }
 });
 
-// Function to log local storage in the context of the page
-function logLocalStorage() {
-  return Object.assign({}, localStorage);
-}
+const getStorage = async (storage) => {
+  const { localStorage, sessionStorage } = storage;
+  try {
+    // const activeTab = await getActiveTab();
 
-// Function to log session storage in the context of the page
-function logSessionStorage() {
-  return Object.assign({}, sessionStorage);
-}
+    const payload = {
+      localStorage: Object.assign({}, localStorage),
+      sessionStorage: Object.assign({}, sessionStorage),
+      // cookies: chrome.cookies.getAll({ url: activeTab.url }),
+    };
+    chrome.runtime.sendMessage({
+      action: MESSAGE_EVENTS.LOG_STORAGE_DATA,
+      data: payload,
+    });
+  } catch (error) {
+    console.log(error.message);
+  }
+};
 
 console.log("Background script is running.");
