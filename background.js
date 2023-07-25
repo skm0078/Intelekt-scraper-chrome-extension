@@ -1,19 +1,10 @@
-const MESSAGE_EVENTS = {
-  GET_STORAGE_DATA: "GET_STORAGE_DATA",
-  LOG_STORAGE_DATA: "LOG_STORAGE_DATA",
-  INSPECT_ON: "INSPECT_ON",
-};
+try {
+  importScripts("utils.js");
+} catch (e) {
+  console.error(e);
+}
 
-const getActiveTab = async () => {
-  const tabs = await chrome.tabs.query({
-    currentWindow: true,
-    active: true,
-  });
-
-  return tabs[0];
-};
-
-// Background script
+// // Background script
 chrome.runtime.onMessage.addListener(async function (
   request,
   sender,
@@ -23,6 +14,9 @@ chrome.runtime.onMessage.addListener(async function (
     case MESSAGE_EVENTS.GET_STORAGE_DATA:
       getStorage(request.data);
       break;
+    case MESSAGE_EVENTS.INSPECTED_DATA:
+      console.log(request.data);
+      break;
     default:
       break;
   }
@@ -31,17 +25,15 @@ chrome.runtime.onMessage.addListener(async function (
 const getStorage = async (storage) => {
   const { localStorage, sessionStorage } = storage;
   try {
-    // const activeTab = await getActiveTab();
+    const activeTab = await getActiveTab();
 
     const payload = {
       localStorage: Object.assign({}, localStorage),
       sessionStorage: Object.assign({}, sessionStorage),
-      // cookies: chrome.cookies.getAll({ url: activeTab.url }),
+      cookies: await chrome.cookies.getAll({ url: activeTab.url }),
     };
-    chrome.runtime.sendMessage({
-      action: MESSAGE_EVENTS.LOG_STORAGE_DATA,
-      data: payload,
-    });
+    console.log(payload);
+    // sendMessage(MESSAGE_EVENTS.LOG_STORAGE_DATA, payload);
   } catch (error) {
     console.log(error.message);
   }

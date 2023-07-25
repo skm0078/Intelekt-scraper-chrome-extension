@@ -1,22 +1,20 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "Intelect Scraper",
   "version": "1.0",
   "description": "A Chrome extension to highlight and store DOM elements.",
-  "browser_action": {
+  "action": {
     "default_popup": "popup.html"
   },
   "permissions": ["activeTab", "tabs", "storage", "cookies"],
   "content_scripts": [
     {
       "js": ["theroom.min.js", "utils.js", "scripts/content.js"],
-      "matches": ["<all_urls>"],
-      "all_frames": true
+      "matches": ["<all_urls>"]
     }
   ],
   "background": {
-    "service_worker": "background.js",
-    "type": "module"
+    "service_worker": "background.js"
   },
   "icons": {
     "16": "./icons/icon16.png",

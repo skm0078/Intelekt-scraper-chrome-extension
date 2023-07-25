@@ -1,10 +1,3 @@
-const sendMessage = (messageEvent, payload) => {
-  chrome.runtime.sendMessage({
-    action: messageEvent,
-    data: payload,
-  });
-};
-
 window.theRoom.configure({
   blockRedirection: true,
   createInspector: true,
@@ -12,11 +5,8 @@ window.theRoom.configure({
   click: function (element, event) {
     event.preventDefault();
 
-    // get the unique css selector of the clicked element
-    // and then copy it to clipboard
-    console.log(element);
+    sendMessage(MESSAGE_EVENTS.INSPECTED_DATA, element.outerHTML);
 
-    // so far so good
     // stop inspection
     window.theRoom.stop(true);
   },
@@ -40,8 +30,6 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     case MESSAGE_EVENTS.INSPECT_ON:
       window.theRoom.start();
       break;
-    case MESSAGE_EVENTS.LOG_STORAGE_DATA:
-      console.log(request.data);
     default:
       break;
   }

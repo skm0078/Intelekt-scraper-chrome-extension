@@ -1,9 +1,3 @@
-const MESSAGE_EVENTS = {
-  GET_STORAGE_DATA: "GET_STORAGE_DATA",
-  LOG_STORAGE_DATA: "LOG_STORAGE_DATA",
-  INSPECT_ON: "INSPECT_ON",
-};
-
 document.addEventListener(
   "DOMContentLoaded",
   function () {
@@ -22,7 +16,7 @@ document.addEventListener(
             });
           }
         );
-
+        console.log("popup");
         // close the extension popup
         // window.close();
       },
